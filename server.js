@@ -25,6 +25,7 @@ var { database } = include('databaseConnection');
 const userCollection = database.db(mongodb_database).collection('users');
 
 app.use(express.urlencoded({extended: false}));
+app.set('view engine', 'ejs');
 
 var mongoStore = MongoStore.create({
 	mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`,
@@ -45,30 +46,41 @@ app.use(session({
 // home page request
 app.get('/', (req, res) => {
     if (!req.session.authenticated) {
-        res.send(`
-  <h1>Welcome</h1>
-  <a href="/signup">Sign Up</a> | <a href="/login">Log In</a>
-`);
+        res.render('home',{username: null});
     } else {
-        res.send(`
-  <h1>Hello, ${req.session.username}</h1>
-  <a href="/members">Go to Members Area</a> | <a href="/logout">Logout</a>
-`);
+        res.render('home',{username: req.session.username, 
+            user_type: req.session.user_type});
     }
 });
 
+function isValidSession(req) {
+    return req.session.authenticated;
+}
+
+function sessionValidation(req, res, next) {
+    if (isValidSession(req)) {
+        next();
+    } else {
+        res.redirect('/login');
+    }
+}
+
+function isAdmin(req) {
+    return req.session.user_type === 'admin';
+}
+
+function adminAuthorization(req, res, next) {
+    if (!isAdmin(req)) {
+        res.status(403);
+        res.render('403');
+    } else {
+        next();
+    }
+}
+
 // signup GET
 app.get('/signup', (req, res) => {
-    res.send(`
-  <h1>Sign Up</h1>
-  Create user
-    <form action='/signup' method='post'>
-    <input name='name' type='text' placeholder='username'><br>
-    <input name='email' type='text' placeholder='email'><br>
-    <input name='password' type='password' placeholder='password'><br>
-    <button>Submit</button>
-    </form>
-`);
+    res.render('signup');
 });
 
 // signup POST
@@ -84,7 +96,7 @@ app.post('/signup', async (req, res) => {
     }
     const { name, email, password } = req.body;
     const hashed = await bcrypt.hash(password, saltRounds);
-    await userCollection.insertOne({ name, email, password: hashed });
+    await userCollection.insertOne({ name, email, password: hashed, user_type: "user" });
 
     req.session.authenticated = true;
     req.session.username = name;
@@ -95,13 +107,7 @@ app.post('/signup', async (req, res) => {
 
 // login GET
 app.get('/login', (req, res) => {
-    res.send(`
-  <h1>Login</h1>
-  <form method="post" action="/login">
-    <input name='email' type='text' placeholder='email'><br>
-    <input name='password' type='password' placeholder='password'><br>
-    <button type="submit">Submit</button>
-  </form>`);
+    res.render('login');
 });
 
 // login POST
@@ -125,21 +131,38 @@ app.post('/login', async (req, res) => {
     }
     req.session.authenticated = true;
     req.session.username = user.name;
+    req.session.user_type = user.user_type;
     req.session.cookie.maxAge = expireTime;
     res.redirect('/members');
 });
 
+// promote user 
+app.get('/promote/:username', async (req, res) => {
+    await userCollection.updateOne(
+        { name: req.params.username },
+        { $set: { user_type: 'admin' } }
+    );
+    res.redirect('/admin');
+});
+
+app.get('/demote/:username', async (req, res) => {
+    await userCollection.updateOne(
+        { name: req.params.username },
+        { $set: { user_type: 'user' } }
+    );
+    res.redirect('/admin');
+});
+
+// admin page
+app.get('/admin', sessionValidation, adminAuthorization, async (req, res) => {
+    const users = await userCollection.find().toArray();
+    res.render('admin', { users });
+});
+
 // members page
-app.get('/members', (req, res) => {
-    if (!req.session.authenticated) {
-        return res.redirect('/');
-    }
+app.get('/members', sessionValidation, (req, res) => {
     const images = ['pic1.png', 'pic2.png', 'pic3.png'];
-    const randomImage = images[Math.floor(Math.random() * images.length)];
-    res.send(`
-  <h1>Hello, ${req.session.username}</h1>
-  <img src="/${randomImage}" width="300"><br>
-  <a href="/logout">Logout</a>`);
+    res.render('members', {username: req.session.username, images});
 });
 
 // logout page
@@ -153,7 +176,7 @@ app.use(express.static(__dirname + "/public"));
 
 app.get("*", (req,res) => {
 	res.status(404);
-	res.send("Page not found - 404");
+    res.render("404");
 })
 
 app.listen(port, () => {

@@ -1,0 +1,25 @@
+<%- include("templates/header") %>
+
+<div class="d-flex justify-content-center align-items-center text-center" style="min-height: 60vh;">
+  <div>
+    <% if (!username) { %>
+        <h1 class="animated-gradient-text">Welcome</h1>
+      <div class="mb-3">
+        <a href="/signup" class="btn btn-warning me-2">Sign Up</a>
+        <a href="/login" class="btn btn-outline-warning">Log In</a>
+      </div>
+    <% } else { %>
+      <h1 class="mb-3">Hello, <%= username %></h1>
+      <div class="mb-3">
+        <a href="/members" class="btn btn-success me-2">Go to Members Area</a>
+      </div>
+      <% if (user_type === 'admin') { %>
+        <p class="text-muted">You are logged in as <strong>admin</strong>.</p>
+      <% } else { %>
+        <p class="text-muted">You are logged in as <strong>user</strong>.</p>
+      <% } %>
+    <% } %>
+  </div>
+</div>
+
+<%- include("templates/footer") %>

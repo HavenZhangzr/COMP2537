@@ -1,0 +1,32 @@
+<%- include("templates/header") %>
+
+<div class="d-flex justify-content-center align-items-center" style="min-height: 60vh;">
+  <div class="card shadow p-4" style="max-width: 450px; width: 100%;">
+    <h3 class="text-center mb-4">Sign Up</h3>
+
+    <form action="/signup" method="POST">
+      <div class="mb-3">
+        <label for="name" class="form-label">Username</label>
+        <input type="text" class="form-control" id="name" name="name" required placeholder="Choose a username">
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label">Email address</label>
+        <input type="email" class="form-control" id="email" name="email" required placeholder="Enter your email">
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" name="password" required placeholder="Create a password">
+      </div>
+
+      <button type="submit" class="btn btn-success w-100">Create Account</button>
+    </form>
+
+    <div class="text-center mt-3">
+      <p>Already have an account? <a href="/login">Log In</a></p>
+    </div>
+  </div>
+</div>
+
+<%- include("templates/footer") %>
