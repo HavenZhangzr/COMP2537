@@ -1,0 +1,181 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+body.dark {
+    background-color: #121212;
+    color: #f0f0f0;
+}
+
+body.dark #difficulty-info {
+    color: #fff;
+}
+
+
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.card {
+    perspective: 1000px;
+    width: 100px;
+    height: 140px;
+    position: relative;
+    cursor: pointer;
+}
+
+.card-inner {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    transform-style: preserve-3d;
+    transition: transform 0.6s ease;
+}
+
+.card-inner.flipped {
+    transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    border: 2px solid #333;
+    position: absolute;
+    backface-visibility: hidden;
+    overflow: hidden;
+}
+
+.card-back {
+    background: url("https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png") center/contain no-repeat;
+    background-color: #fff;
+}
+
+.card-front {
+    transform: rotateY(180deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+}
+
+button {
+    transition: background-color 0.2s ease;
+}
+
+#countdown-overlay {
+    font-weight: bold;
+    animation: pulse 0.6s ease-in-out infinite alternate;
+}
+
+
+#result-box {
+    min-width: 250px;
+    max-width: 400px;
+    z-index: 1100;
+}
+
+#countdown-toast.show {
+    display: block;
+    opacity: 1;
+}
+
+#timer {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2a75bb;
+    transition: color 0.4s ease;
+}
+
+#timer.low-time {
+    color: red;
+    animation: pulse 0.7s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.15);
+        opacity: 0.7;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+
+.dot {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.5rem;
+    border-radius: 50%;
+    vertical-align: middle;
+}
+
+.dot.easy {
+    background-color: green;
+}
+
+.dot.medium {
+    background-color: orange;
+}
+
+.dot.hard {
+    background-color: red;
+}
+
+.countdown-text {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2a75bb;
+    margin-left: 0.25rem;
+}
+
+.countdown-text.low-time {
+    color: red;
+    animation: pulse 0.6s ease-in-out infinite;
+}
+
+.toast-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #dc3545;
+    color: white;
+    padding: 1.5rem 2.5rem;
+    border-radius: 10px;
+    font-size: 1.75rem;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+    z-index: 2000;
+}
+
+.toast-message.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.05);
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
